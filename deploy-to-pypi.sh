@@ -1,0 +1,1 @@
+docker run --rm -v $(pwd):/code intezer/python-setuptools:0.4 sh /build-and-upload.sh
