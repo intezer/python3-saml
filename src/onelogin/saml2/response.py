@@ -8,7 +8,7 @@ MIT License
 SAML Response class of OneLogin's Python Toolkit.
 
 """
-
+from collections import defaultdict
 from copy import deepcopy
 from onelogin.saml2.constants import OneLogin_Saml2_Constants
 from onelogin.saml2.utils import OneLogin_Saml2_Utils, OneLogin_Saml2_Error, OneLogin_Saml2_ValidationError, return_false_on_exception
@@ -573,15 +573,10 @@ class OneLogin_Saml2_Response(object):
         Gets the Attributes from the AttributeStatement element.
         EncryptedAttributes are not supported
         """
-        attributes = {}
+        attributes = defaultdict(list)
         attribute_nodes = self.__query_assertion('/saml:AttributeStatement/saml:Attribute')
         for attribute_node in attribute_nodes:
             attr_name = attribute_node.get('Name')
-            if attr_name in attributes.keys():
-                raise OneLogin_Saml2_ValidationError(
-                    'Found an Attribute element with duplicated Name',
-                    OneLogin_Saml2_ValidationError.DUPLICATED_ATTRIBUTE_NAME_FOUND
-                )
 
             values = []
             for attr in attribute_node.iterchildren('{%s}AttributeValue' % OneLogin_Saml2_Constants.NSMAP['saml']):
@@ -600,7 +595,7 @@ class OneLogin_Saml2_Response(object):
                             'value': nameid.text
                         }
                     })
-            attributes[attr_name] = values
+            attributes[attr_name].extend(values)
         return attributes
 
     def validate_num_assertions(self):
